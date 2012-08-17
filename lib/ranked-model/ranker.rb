@@ -28,7 +28,7 @@ module RankedModel
 
         validate_ranker_for_instance!
       end
-      
+
       def validate_ranker_for_instance!
         if ranker.scope && !instance.class.respond_to?(ranker.scope)
           raise RankedModel::InvalidScope, %Q{No scope called "#{ranker.scope}" found in model}
@@ -142,15 +142,15 @@ module RankedModel
           # Never update ourself, shift others around us.
           _scope = _scope.where( instance.class.arel_table[:id].not_eq(instance.id) )
         end
-        if current_first.rank && current_first.rank > RankedModel::MIN_RANK_VALUE && rank == RankedModel::MAX_RANK_VALUE
+        if current_first && current_first.rank && current_first.rank > RankedModel::MIN_RANK_VALUE && rank == RankedModel::MAX_RANK_VALUE
           _scope.
             where( instance.class.arel_table[ranker.column].lteq(rank) ).
             update_all( "#{ranker.column} = #{ranker.column} - 1" )
-        elsif current_last.rank && current_last.rank < (RankedModel::MAX_RANK_VALUE - 1) && rank < current_last.rank
+        elsif current_last && current_last.rank && current_last.rank < (RankedModel::MAX_RANK_VALUE - 1) && rank < current_last.rank
           _scope.
             where( instance.class.arel_table[ranker.column].gteq(rank) ).
             update_all( "#{ranker.column} = #{ranker.column} + 1" )
-        elsif current_first.rank && current_first.rank > RankedModel::MIN_RANK_VALUE && rank > current_first.rank 
+        elsif current_first && current_first.rank && current_first.rank > RankedModel::MIN_RANK_VALUE && rank > current_first.rank
           _scope.
             where( instance.class.arel_table[ranker.column].lt(rank) ).
             update_all( "#{ranker.column} = #{ranker.column} - 1" )
@@ -199,7 +199,7 @@ module RankedModel
                     instance.attributes["#{ranker.with_same.first}"]
                   )
                 ) {|scoper, attr|
-                  scoper.and( 
+                  scoper.and(
                     instance.class.arel_table[attr].eq(
                       instance.attributes["#{attr}"]
                     )
